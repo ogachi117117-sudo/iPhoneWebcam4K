@@ -13,6 +13,13 @@ targets:
       - path: iPhoneWebcam4K
     info:
       path: iPhoneWebcam4K/Info.plist
+      properties:
+        NSCameraUsageDescription: "PCのWebカメラ映像として配信するためにカメラを使用します。"
+        NSLocalNetworkUsageDescription: "USB接続されたPCへ映像をストリーミングするためにローカルネットワークを使用します。"
+        UIRequiresFullScreen: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UILaunchScreen: {}
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.iphonewebcam4k
