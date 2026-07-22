@@ -79,9 +79,14 @@ bool H264Decoder::createDecoderMFT() {
     IMFActivate** activateList = nullptr;
     UINT32 count = 0;
 
+    // Hardware MFTs are always asynchronous (they must be driven via
+    // IMFMediaEventGenerator, not direct ProcessInput/ProcessOutput calls).
+    // This class uses the synchronous calling convention, so only synchronous
+    // (software) decoders are requested here; asking for hardware/async ones
+    // would silently fail every ProcessInput call.
     HRESULT hr = MFTEnumEx(
         MFT_CATEGORY_VIDEO_DECODER,
-        MFT_ENUM_FLAG_SYNCMFT | MFT_ENUM_FLAG_ASYNCMFT | MFT_ENUM_FLAG_HARDWARE | MFT_ENUM_FLAG_SORTANDFILTER,
+        MFT_ENUM_FLAG_SYNCMFT | MFT_ENUM_FLAG_SORTANDFILTER,
         &inputType, nullptr, &activateList, &count);
 
     if (FAILED(hr) || count == 0) {
@@ -182,7 +187,12 @@ void H264Decoder::submitVideoSample(const std::vector<uint8_t>& avccData) {
         drainOutput();
         hr = transform_->ProcessInput(0, sample.Get(), 0);
     }
-    if (FAILED(hr)) return;
+    if (FAILED(hr)) {
+        wchar_t buf[32];
+        swprintf_s(buf, L"0x%08X", static_cast<unsigned int>(hr));
+        reportError(std::wstring(L"ProcessInputに失敗しました (HRESULT=") + buf + L")");
+        return;
+    }
 
     drainOutput();
 }
