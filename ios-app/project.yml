@@ -10,7 +10,11 @@ targets:
     type: application
     platform: iOS
     sources:
-      - path: iPhoneWebcam4K
+      - path: iPhoneWebcam4K/iPhoneWebcam4KApp.swift
+      - path: iPhoneWebcam4K/ContentView.swift
+      - path: iPhoneWebcam4K/CameraStreamer.swift
+      - path: iPhoneWebcam4K/StreamServer.swift
+      - path: iPhoneWebcam4K/WireProtocol.swift
     info:
       path: iPhoneWebcam4K/Info.plist
       properties:
@@ -29,3 +33,32 @@ targets:
         CODE_SIGNING_REQUIRED: NO
         CODE_SIGNING_ALLOWED: NO
         ENABLE_BITCODE: NO
+    dependencies:
+      - target: BroadcastExtension
+        embed: true
+
+  BroadcastExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BroadcastExtension/SampleHandler.swift
+      - path: iPhoneWebcam4K/StreamServer.swift
+      - path: iPhoneWebcam4K/WireProtocol.swift
+    info:
+      path: BroadcastExtension/Info.plist
+      properties:
+        NSLocalNetworkUsageDescription: "USB接続されたPCへ画面映像をストリーミングするためにローカルネットワークを使用します。"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.broadcast-services-upload
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).SampleHandler"
+          RPBroadcastProcessMode: RPBroadcastProcessModeSampleBuffer
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.iphonewebcam4k.BroadcastExtension
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGNING_ALLOWED: NO
+        ENABLE_BITCODE: NO
+        SKIP_INSTALL: YES

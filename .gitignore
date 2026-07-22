@@ -5,3 +5,4 @@ x64/
 *.pdb
 *.ipa
 *.log
+dist/
