@@ -36,9 +36,18 @@ private struct BroadcastPickerView: UIViewRepresentable {
     let preferredExtension: String
 
     func makeUIView(context: Context) -> RPSystemBroadcastPickerView {
-        let view = RPSystemBroadcastPickerView(frame: .zero)
+        // RPSystemBroadcastPickerView's icon is a template image tinted by
+        // .tintColor; without setting it explicitly the icon can render
+        // essentially invisible against light backgrounds. A translucent
+        // circular background also keeps the tap target visible even if the
+        // icon itself fails to resolve (e.g. right after a fresh install).
+        let view = RPSystemBroadcastPickerView(frame: CGRect(x: 0, y: 0, width: 84, height: 84))
         view.preferredExtension = preferredExtension
         view.showsMicrophoneButton = false
+        view.tintColor = .white
+        view.backgroundColor = .systemBlue
+        view.layer.cornerRadius = 42
+        view.clipsToBounds = true
         return view
     }
 
