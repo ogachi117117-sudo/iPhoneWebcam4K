@@ -74,33 +74,25 @@ void H264Decoder::shutdown() {
     outputTypeSet_ = false;
 }
 
+namespace {
+// CLSID of the in-box "Microsoft H264 Video Decoder MFT" — a synchronous
+// software decoder that ships with Windows 10/11 and is always registered,
+// regardless of what hardware decoders MFTEnumEx happens to surface on a
+// given machine. Hardware MFTs are always asynchronous (they must be driven
+// via IMFMediaEventGenerator, not direct ProcessInput/ProcessOutput calls as
+// this class does), and enumeration order/results for synchronous decoders
+// varies by system, so this CLSID is instantiated directly instead.
+const GUID kMSH264DecoderMFT = {
+    0x62CE7E72, 0x4C71, 0x4D20, {0xB1, 0x5D, 0x45, 0x28, 0x31, 0xA8, 0x7D, 0x9D}};
+}  // namespace
+
 bool H264Decoder::createDecoderMFT() {
-    MFT_REGISTER_TYPE_INFO inputType = {MFMediaType_Video, MFVideoFormat_H264};
-    IMFActivate** activateList = nullptr;
-    UINT32 count = 0;
-
-    // Hardware MFTs are always asynchronous (they must be driven via
-    // IMFMediaEventGenerator, not direct ProcessInput/ProcessOutput calls).
-    // This class uses the synchronous calling convention, so only synchronous
-    // (software) decoders are requested here; asking for hardware/async ones
-    // would silently fail every ProcessInput call.
-    HRESULT hr = MFTEnumEx(
-        MFT_CATEGORY_VIDEO_DECODER,
-        MFT_ENUM_FLAG_SYNCMFT | MFT_ENUM_FLAG_SORTANDFILTER,
-        &inputType, nullptr, &activateList, &count);
-
-    if (FAILED(hr) || count == 0) {
-        if (activateList) CoTaskMemFree(activateList);
-        reportError(L"H.264デコーダが見つかりません");
-        return false;
-    }
-
-    HRESULT activateHr = activateList[0]->ActivateObject(IID_PPV_ARGS(transform_.GetAddressOf()));
-    for (UINT32 i = 0; i < count; i++) activateList[i]->Release();
-    CoTaskMemFree(activateList);
-
-    if (FAILED(activateHr)) {
-        reportError(L"H.264デコーダの初期化に失敗しました");
+    HRESULT hr = CoCreateInstance(kMSH264DecoderMFT, nullptr, CLSCTX_INPROC_SERVER,
+                                   IID_PPV_ARGS(transform_.GetAddressOf()));
+    if (FAILED(hr)) {
+        wchar_t buf[32];
+        swprintf_s(buf, L"0x%08X", static_cast<unsigned int>(hr));
+        reportError(std::wstring(L"H.264デコーダの作成に失敗しました (HRESULT=") + buf + L")");
         return false;
     }
     return true;
