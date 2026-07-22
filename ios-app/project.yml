@@ -47,6 +47,7 @@ targets:
     info:
       path: BroadcastExtension/Info.plist
       properties:
+        CFBundleDisplayName: "iPhoneWebcam4K"
         NSLocalNetworkUsageDescription: "USB接続されたPCへ画面映像をストリーミングするためにローカルネットワークを使用します。"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.broadcast-services-upload
