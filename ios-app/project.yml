@@ -1,0 +1,24 @@
+name: iPhoneWebcam4K
+options:
+  bundleIdPrefix: com.example.iphonewebcam4k
+  deploymentTarget:
+    iOS: "16.0"
+  developmentLanguage: en
+
+targets:
+  iPhoneWebcam4K:
+    type: application
+    platform: iOS
+    sources:
+      - path: iPhoneWebcam4K
+    info:
+      path: iPhoneWebcam4K/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.iphonewebcam4k
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGNING_ALLOWED: NO
+        ENABLE_BITCODE: NO
